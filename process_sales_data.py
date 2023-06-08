@@ -107,7 +107,7 @@ def process_sales_data(sales_csv_path, orders_dir_path):
         writer = pd.ExcelWriter(f"{worksheet_name}.xlsx", engine="xlsxwriter")
         df.to_excel(writer, sheet_name=["worksheet_name"])
         workbook = writer.book
-        worksheet = writer.sheets["worksheet_name"]
+        worksheet = writer.sheets[f"{worksheet_name}"]
 
         # TODO: Define format for the money columns
         dollar_format = workbook.add_format({"num_format": "$#,##0.00"})
@@ -117,7 +117,6 @@ def process_sales_data(sales_csv_path, orders_dir_path):
 
         # TODO: Close the Excelwriter 
         writer.close()
-        break
     return
     
 if __name__ == '__main__':
