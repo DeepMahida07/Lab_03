@@ -28,8 +28,7 @@
             "request": "launch",
             "program": "process_sales_data.py",
             "console": "integratedTerminal",
-            "justMyCode": true,
-            "args": ["sales_data234.csv"]
+            "justMyCode": true
         },
     ]
 }

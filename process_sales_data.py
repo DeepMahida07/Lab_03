@@ -28,13 +28,13 @@ def get_sales_csv_path():
     # TODO: Check whether command line parameter provided
     nums_params = len(sys.argv) - 1
     if nums_params < 1:
-        print("Error:Missing CSV path parameter!")
+        print("Error:Missing CSV path parameter.")
         sys.exit()
 
     # TODO: Check whether provide parameter is valid path of file
     csv_path = sys.argv[1]
-    if os.path.isfile(csv_path):
-        print("Error:CSV path is not existing file!")
+    if not os.path.isfile(csv_path):
+        print("Error:CSV path is not an existing file!")
         sys.exit()
 
     # TODO: Return path of sales data CSV file
@@ -53,7 +53,7 @@ def create_orders_dir(sales_csv_path):
     sales_csv_path = os.path.dirname(sales_csv_path)
 
     # TODO: Determine the path of the directory to hold the order data files
-    todays_date = date.today().isformat()
+    todays_date = date.today().isoformat()
     orders_dir = f'Orders_{todays_date}'
     orders_dir_path = os.path.join(sales_csv_path, orders_dir)
 
@@ -72,16 +72,16 @@ def process_sales_data(sales_csv_path, orders_dir_path):
         orders_dir_path (str): Path of orders directory
     """
     # TODO: Import the sales data from the CSV file into a DataFrame
-    dataframe = pd.read_csv(sales_csv_path)
+    df = pd.read_csv(sales_csv_path)
 
     # TODO: Insert a new "TOTAL PRICE" column into the DataFrame
-    dataframe.insert(7, 'Total Price', dataframe['ITEM QUANTITY'] * dataframe['ITEM PRICE'])
+    df.insert(7, 'TOTAL PRICE', df['ITEM QUANTITY'] * df['ITEM PRICE'])
 
     # TODO: Remove columns from the DataFrame that are not needed
-    dataframe.drop(column=['ADRESSS', 'CITY', 'STATE', 'POSTAL CODE', 'COUNTRY'], inplace=True)
+    df.drop(columns=['ADDRESS', 'CITY', 'STATE', 'POSTAL CODE', 'COUNTRY'], inplace=True)
 
     # TODO: Groups orders by ID and iterate 
-    for order_id, order_df in dataframe.groupby('ORDER ID'):
+    for order_id, order_df in df.groupby('ORDER ID'):
 
         # TODO: Remove the 'ORDER ID' column
         order_df.drop(columns=['ORDER ID'], inplace=True)
@@ -101,13 +101,24 @@ def process_sales_data(sales_csv_path, orders_dir_path):
 
         # TODO: Export the data to an Excel sheet
         worksheet_name = f'Order #{order_id}'
-        order_df.to_excel(order_excel_path, index=False, sheet_name =worksheet_name)
-
+        #order_df.to_excel(order_excel_path, index=False, sheet_name =worksheet_name)
+    
         # TODO: Format the Excel sheet
-        # TODO: Define format for the money columns
-        # TODO: Format each colunm
-        # TODO: Close the Excelwriter 
-    return
+        writer = pd.ExcelWriter(f"{worksheet_name}.xlsx", engine="xlsxwriter")
+        df.to_excel(writer, sheet_name=["worksheet_name"])
+        workbook = writer.book
+        worksheet = writer.sheets["worksheet_name"]
 
+        # TODO: Define format for the money columns
+        dollar_format = workbook.add_format({"num_format": "$#,##0.00"})
+
+        # TODO: Format each colunm
+        worksheet.set_column(1, 1, 18, dollar_format)
+
+        # TODO: Close the Excelwriter 
+        writer.close()
+        break
+    return
+    
 if __name__ == '__main__':
     main()
